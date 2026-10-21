@@ -138,18 +138,18 @@ git push -u origin main
 
 ## 图床（Cloudflare R2）
 
-文章配图放 R2，通过自定义域 `img.zengxpmaster.fun` 访问；仓库只保留站点自身的图（横幅、头像）。
+文章配图放 R2，通过 `https://img.zengxpmaster.fun` 访问；浏览页在站内 `/gallery/`。
 
-### 一次性配置
+### 当前状态
 
-1. R2 → 创建桶（默认 `blog-images`）。
-2. 桶 → Settings → Custom Domains → 绑定 `img.zengxpmaster.fun`（域名在 Cloudflare，会自动建记录并签证书）。
-3. R2 → Manage API Tokens → 创建 S3 兼容密钥，填进 `.env`：
+| 项 | 值 |
+| --- | --- |
+| 桶 | `blog-images` |
+| 自定义域 | `img.zengxpmaster.fun`（R2 托管） |
+| 已有内容 | `images/*`，从旧 GitHub Pages 的 ImgBed 迁入，路径保持不变 |
+| 浏览页 | `/gallery/`，清单在 [src/data/gallery.json](src/data/gallery.json) |
 
-```bash
-cp .env.example .env
-# R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_BUCKET / R2_PUBLIC_BASE
-```
+旧的 `https://img.zengxpmaster.fun/images/xxxx.png` 链接继续有效，因为对象键与原来一致。
 
 ### 上传
 
@@ -158,14 +158,16 @@ node scripts/upload-image.mjs ./cover.png
 # ✓ cover.png → https://img.zengxpmaster.fun/posts/2026-10/cover.png
 #   ![](https://img.zengxpmaster.fun/posts/2026-10/cover.png)
 
-node scripts/upload-image.mjs ./cover.png posts/2024-05/cover.png   # 指定对象键
-node scripts/upload-image.mjs ./imgs                                # 整个目录
+node scripts/upload-image.mjs ./cover.png images/202601011200000.png   # 指定对象键
+node scripts/upload-image.mjs ./imgs                                    # 整个目录
 ```
 
-国内网络直连 `*.r2.cloudflarestorage.com` 可能被干扰，可改用 wrangler 走 Cloudflare API：
+键名以 `images/` 开头时会自动写入 `src/data/gallery.json`，重新构建后出现在图床页。
+
+本机实测直连 `*.r2.cloudflarestorage.com`（S3 端点）会被 TLS 重置，改用 wrangler 走 Cloudflare API：
 
 ```bash
-pnpm exec wrangler r2 object put blog-images/posts/test.png --file=./test.png --content-type=image/png
+pnpm exec wrangler r2 object put blog-images/images/test.png --file=./test.png --content-type=image/png --remote
 ```
 
 ### PicGo
@@ -176,8 +178,15 @@ pnpm exec wrangler r2 object put blog-images/posts/test.png --file=./test.png --
 | --- | --- |
 | Endpoint | `https://<账户ID>.r2.cloudflarestorage.com` |
 | Bucket | `blog-images` |
-| AccessKey / SecretKey | R2 的 S3 密钥 |
+| AccessKey / SecretKey | R2 的 S3 密钥（R2 → Manage API Tokens） |
 | 自定义域名 | `https://img.zengxpmaster.fun` |
-| 存储路径 | `posts/{year}/{month}/` |
+| 存储路径 | `images/` |
+
+S3 端点在国内可能连不上，PicGo 里需要配代理。
+
+## 已知问题
+
+- **评论后端不可达**：Twikoo 仍部署在 `twikoo-cloudflare.zengxianpei2333.workers.dev`，`*.workers.dev` 在国内无法直连，评论区会一直转圈。解决方式二选一：给该 Worker 绑一个自定义子域（如 `twikoo.zengxpmaster.fun`），或在该 Worker 前挂一层代理。
+- `img.zengxpmaster.fun` 根路径没有索引（R2 对象存储不认 `index.html`），浏览图床请走 `/gallery/`。
 
 PicGo 里建议配代理，否则可能连不上 R2 的 S3 端点。

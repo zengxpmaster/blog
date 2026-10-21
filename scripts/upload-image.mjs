@@ -123,5 +123,25 @@ if (stat.isDirectory()) {
 } else {
 	const key = process.argv[3] || `posts/${new Date().toISOString().slice(0, 7)}/${basename(input)}`;
 	ok = await upload(env, input, key);
+	if (ok) recordInGallery(key, stat.size);
 }
 process.exit(ok ? 0 : 1);
+
+/** 把新图同步进图床页的清单（src/data/gallery.json） */
+function recordInGallery(key, size) {
+	if (!key.startsWith("images/")) return;
+	const file = "src/data/gallery.json";
+	let data;
+	try {
+		data = JSON.parse(readFileSync(file, "utf8"));
+	} catch {
+		return;
+	}
+	const date = key.replace(/^images\//, "").match(/^(\d{4})(\d{2})(\d{2})/);
+	const title = date ? `${date[1]}-${date[2]}-${date[3]}` : basename(key);
+	if (data.items.some((i) => i.key === key)) return;
+	data.items.push({ key, title, size });
+	data.items.sort((a, b) => a.key.localeCompare(b.key));
+	writeFileSync(file, `${JSON.stringify(data, null, "\t")}\n`, "utf8");
+	console.log(`  + 已写入 ${file}`);
+}
