@@ -42,6 +42,16 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Archive,
 		LinkPreset.About,
 		{
+			name: "友链",
+			url: "/links/",
+			external: false,
+		},
+		{
+			name: "图床",
+			url: "https://img.zengxpmaster.fun/",
+			external: true,
+		},
+		{
 			name: "GitHub",
 			url: "https://github.com/zengxpmaster", // Internal links should not include the base path, as it is automatically added
 			external: true, // Show an external link icon and will open in a new tab

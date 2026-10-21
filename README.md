@@ -91,18 +91,29 @@ git push -u origin main
 
 所以不需要额外指定产物目录，`wrangler deploy` 会直接把 `dist/` 上传为静态资源。
 
-### 3. 绑定域名
+### 3. 绑定域名（当前已生效）
 
-- Workers 项目 → Settings → Domains & Routes → 添加自定义域 `www.zengxpmaster.fun`。
-- 顶级域 `zengxpmaster.fun` 建一条 Redirect Rule（或 Workers 路由）做 301 到 `www`。
-- DNS 在 Cloudflare 托管时无需再放 `CNAME` 文件。
+`wrangler.jsonc` 用的是 **Workers Route**，不是 Custom Domain：
+
+```jsonc
+"routes": [
+  { "pattern": "www.zengxpmaster.fun/*", "zone_name": "zengxpmaster.fun" },
+  { "pattern": "zengxpmaster.fun/*", "zone_name": "zengxpmaster.fun" }
+]
+```
+
+原因：`www` 上已经有一条指向 GitHub Pages 的 DNS 记录，`custom_domain: true` 会因为「externally managed DNS records」报错 100117。Route 不需要改 DNS，直接在当前记录（Cloudflare 代理）后面接管流量，回滚时删掉 route 就退回旧站。
+
+裸域由 [src/worker.ts](src/worker.ts) 做 301 到 `www`，`main` + `assets.binding = ASSETS` 的组合让 Worker 既能重定向又能吐静态文件。
 
 ### 4. 切换顺序（保证可回滚）
 
-1. 新项目先跑起来，用 workers.dev 域名验收：文章、404、`_redirects`、搜索、评论、暗色模式、移动端。
-2. 绑 `www` 自定义域，观察一天。
-3. 暂停（不要立即删除）Cloudflare Pages 旧项目、关闭 GitHub Pages。
-4. 观察一周无异常后再删除旧项目。
+1. 先 `wrangler deploy` 到 workers.dev（国内一般访问不了）或在本地 `astro preview` 验收。
+2. Route 生效即切流，观察一天。
+3. 暂停（不要立即删除）Cloudflare Pages 旧项目、GitHub Pages 仓库。
+4. 观察一周无异常后再删除。
+
+回滚：`wrangler deploy` 前先 `wrangler rollback`，或直接删掉两条 route。
 
 ## 旧链接映射
 
@@ -111,13 +122,62 @@ git push -u origin main
 | `/2024-05/如何搭建个人博客.html` | `/posts/how-to-build-a-blog/` |
 | `/2024-05/如何破解校园网多设备限制.html` | `/posts/crack-campus-network/` |
 | `/2024-10/近况说明.html` | `/posts/life-update-2024/` |
+| `/posts/836f8b7fa8ea.html`（线上 Hexo） | `/posts/how-to-build-a-blog/` |
+| `/posts/7ae7ba9c416f.html`（线上 Hexo） | `/posts/crack-campus-network/` |
+| `/posts/ae31ed42a77e.html`（线上 Hexo） | `/posts/life-update-2024/` |
 | `/archives/`、`/tags/*`、`/categories/*` | `/archive/` |
-| `/message-board/`、`/my-luck/`、`/links/` | `/about/` |
+| `/message-board/`、`/my-luck/` | `/about/` |
 
-旧的留言板、友链、音乐页没有在新站重建，相关请求 301 到关于页。若要恢复，友链可做成 `src/pages/links.astro`，音乐播放器可参照 Fuwari 社区方案挂 APlayer + Meting。
+友链页保留为 `/links/`（[src/pages/links.astro](src/pages/links.astro)），图床走外链 `https://img.zengxpmaster.fun/`。
 
 ## 注意事项
 
 - Pagefind 对中文不支持词干分析（stemming），搜索按字面匹配，属于正常现象。
 - `.npmrc` 里 `node-linker=hoisted` 是为了在 Windows 上避免 pnpm junction 造成的模块解析问题，可保留。
 - 构建机需要 Node 20+。
+
+## 图床（Cloudflare R2）
+
+文章配图放 R2，通过自定义域 `img.zengxpmaster.fun` 访问；仓库只保留站点自身的图（横幅、头像）。
+
+### 一次性配置
+
+1. R2 → 创建桶（默认 `blog-images`）。
+2. 桶 → Settings → Custom Domains → 绑定 `img.zengxpmaster.fun`（域名在 Cloudflare，会自动建记录并签证书）。
+3. R2 → Manage API Tokens → 创建 S3 兼容密钥，填进 `.env`：
+
+```bash
+cp .env.example .env
+# R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_BUCKET / R2_PUBLIC_BASE
+```
+
+### 上传
+
+```bash
+node scripts/upload-image.mjs ./cover.png
+# ✓ cover.png → https://img.zengxpmaster.fun/posts/2026-10/cover.png
+#   ![](https://img.zengxpmaster.fun/posts/2026-10/cover.png)
+
+node scripts/upload-image.mjs ./cover.png posts/2024-05/cover.png   # 指定对象键
+node scripts/upload-image.mjs ./imgs                                # 整个目录
+```
+
+国内网络直连 `*.r2.cloudflarestorage.com` 可能被干扰，可改用 wrangler 走 Cloudflare API：
+
+```bash
+pnpm exec wrangler r2 object put blog-images/posts/test.png --file=./test.png --content-type=image/png
+```
+
+### PicGo
+
+图床设置 → S3 兼容：
+
+| 字段 | 值 |
+| --- | --- |
+| Endpoint | `https://<账户ID>.r2.cloudflarestorage.com` |
+| Bucket | `blog-images` |
+| AccessKey / SecretKey | R2 的 S3 密钥 |
+| 自定义域名 | `https://img.zengxpmaster.fun` |
+| 存储路径 | `posts/{year}/{month}/` |
+
+PicGo 里建议配代理，否则可能连不上 R2 的 S3 端点。

@@ -1,0 +1,54 @@
+---
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import { Icon } from "astro-icon/components";
+
+const links = [
+	{
+		name: "GitHub",
+		desc: "面向开源及私有软件项目的托管平台",
+		url: "https://github.com/zengxpmaster",
+		icon: "fa6-brands:github",
+	},
+	{
+		name: "Hexo",
+		desc: "快速、简洁且高效的博客框架",
+		url: "https://hexo.io",
+		icon: "fa6-solid:blog",
+	},
+	{
+		name: "Fluid",
+		desc: "本站旧主题的仓库",
+		url: "https://github.com/fluid-dev/hexo-theme-fluid",
+		icon: "fa6-solid:droplet",
+	},
+	{
+		name: "图床",
+		desc: "个人图片仓库",
+		url: "https://img.zengxpmaster.fun/",
+		icon: "fa6-solid:images",
+	},
+];
+---
+
+<MainGridLayout title="友链" description="友情链接">
+	<div class="flex flex-col gap-4">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			{links.map((l) => (
+				<a
+					href={l.url}
+					target="_blank"
+					rel="noopener"
+					class="card-base px-5 py-4 flex items-center gap-4 hover:scale-[1.02] transition active:scale-95"
+				>
+					<div class="h-10 w-10 rounded-lg bg-[var(--btn-regular-bg)] flex items-center justify-center shrink-0">
+						<Icon name={l.icon} class="text-xl text-[var(--primary)]" />
+					</div>
+					<div class="min-w-0">
+						<div class="font-bold text-black/90 dark:text-white/90">{l.name}</div>
+						<div class="text-sm text-black/50 dark:text-white/50 truncate">{l.desc}</div>
+					</div>
+				</a>
+			))}
+		</div>
+	</div>
+</MainGridLayout>
