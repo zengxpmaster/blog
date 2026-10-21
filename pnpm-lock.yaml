@@ -168,6 +168,9 @@ importers:
       postcss-nesting:
         specifier: ^13.0.2
         version: 13.0.2(postcss@8.5.6)
+      twikoo:
+        specifier: 1.6.39
+        version: 1.6.39
       wrangler:
         specifier: ^4.151.3
         version: 4.151.3(@types/node@24.5.2)
@@ -5516,6 +5519,9 @@ packages:
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
+  twikoo@1.6.39:
+    resolution: {integrity: sha512-gWM+gtZlHnlkGHL4ycQN1vLLuRxALwDrLVGcEOgkbKU3WX9qYf9zz/fFxbqCGvB/LTZLRuhLAc3EuwCtBI7VNQ==}
 
   type-fest@4.41.0:
     resolution: {integrity: sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA==}
@@ -12179,6 +12185,8 @@ snapshots:
       typescript: 5.9.3
 
   tslib@2.8.1: {}
+
+  twikoo@1.6.39: {}
 
   type-fest@4.41.0: {}
 
