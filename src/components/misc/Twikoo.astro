@@ -1,0 +1,57 @@
+---
+interface Props {
+	class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+---
+
+<div id="twikoo-wrapper" class:list={["mt-8", className]}>
+	<div id="twikoo"></div>
+</div>
+
+<script is:inline define:vars={{ twikooEnvId: "https://twikoo-cloudflare.zengxianpei2333.workers.dev/" }}>
+	(function () {
+		const TWIKOO_SRC = "https://cdn.staticfile.org/twikoo/1.6.39/twikoo.all.min.js";
+		let scriptLoaded = false;
+
+		function renderComments() {
+			const el = document.getElementById("twikoo");
+			if (!el) return;
+			// Swup 切页后同一路径不重复渲染
+			const key = window.location.pathname;
+			if (window.__twikooPath === key) return;
+			window.__twikooPath = key;
+
+			el.innerHTML = "";
+			window.twikoo.init({
+				envId: twikooEnvId,
+				el: "#twikoo",
+				path: key,
+				lang: "zh-CN",
+			});
+		}
+
+		function boot() {
+			if (window.twikoo) {
+				renderComments();
+				return;
+			}
+			if (scriptLoaded) return;
+			scriptLoaded = true;
+			const s = document.createElement("script");
+			s.src = TWIKOO_SRC;
+			s.onload = renderComments;
+			document.head.appendChild(s);
+		}
+
+		boot();
+
+		// 站内跳转（Swup 局部替换）后重新挂载
+		const bindSwup = () => {
+			window.swup?.hooks?.on("page:view", boot);
+		};
+		if (window.swup) bindSwup();
+		else document.addEventListener("swup:enable", bindSwup);
+	})();
+</script>
