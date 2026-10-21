@@ -2,6 +2,10 @@
 
 个人博客，Astro + [Fuwari](https://github.com/saicaca/fuwari) 主题，部署在 Cloudflare Workers（Static Assets）。
 
+- 线上：<https://www.zengxpmaster.fun>
+- 仓库：<https://github.com/zengxpmaster/blog>
+- 图床：<https://img.zengxpmaster.fun>（Cloudflare R2）
+
 从 Hexo 迁移而来：文章由旧站构建产物还原为 Markdown，旧链接通过 `_redirects` 做 301。
 
 ## 目录
