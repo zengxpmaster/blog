@@ -1,9 +1,21 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "zengxpmaster-blog",
+	"main": "src/worker.ts",
 	"compatibility_date": "2026-01-01",
 	"assets": {
 		"directory": "./dist",
+		"binding": "ASSETS",
 		"not_found_handling": "404-page"
-	}
+	},
+	"routes": [
+		{
+			"pattern": "www.zengxpmaster.fun/*",
+			"zone_name": "zengxpmaster.fun"
+		},
+		{
+			"pattern": "zengxpmaster.fun/*",
+			"zone_name": "zengxpmaster.fun"
+		}
+	]
 }
