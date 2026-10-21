@@ -36,6 +36,24 @@ pnpm preview    # 预览构建结果
 pnpm new-post my-post-name
 ```
 
+### 提交签名（DSH）
+
+DSH 代提交的 commit 末尾会自动带一行随机情绪签名：
+
+```
+chore: 增加 DSH 提交签名钩子
+
+DSH: 😤 这次一定跑通
+```
+
+实现是 `.githooks/commit-msg` + `DSH_COMMIT=1` 环境变量，签名池在 [scripts/dsh-signature.mjs](scripts/dsh-signature.mjs)。克隆后需要启用一次：
+
+```bash
+git config core.hooksPath .githooks
+```
+
+不加 `DSH_COMMIT=1` 时钩子不生效，自己提交不受影响。
+
 ## 文章 front matter
 
 ```yaml
