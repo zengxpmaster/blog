@@ -1,0 +1,4 @@
+/* 单一入口：先 main（定义 @layer components 里的 .link 等），再 markdown，
+   保证 postcss-import 内联后 Tailwind 在同一个编译单元里能解析跨文件的 @apply */
+@import "./main.css";
+@import "./markdown.css";
