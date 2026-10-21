@@ -10,16 +10,39 @@ const { class: className = "" } = Astro.props;
 	<div id="twikoo"></div>
 </div>
 
-<script is:inline define:vars={{ twikooEnvId: "https://twikoo-cloudflare.zengxianpei2333.workers.dev/" }}>
+<script is:inline define:vars={{ twikooEnvId: "https://twikoo.zengxpmaster.fun/" }}>
 	(function () {
-		const TWIKOO_SRC = "https://cdn.staticfile.org/twikoo/1.6.39/twikoo.all.min.js";
-		let scriptLoaded = false;
+		// 自托管，避免第三方 CDN 在国内不可达
+		const TWIKOO_SRC = "/js/twikoo.all.min.js";
+		const ready = () => typeof window.twikoo?.init === "function";
+
+		function withTwikoo(cb) {
+			if (ready()) return cb();
+			if (window.__twikooQueue) {
+				window.__twikooQueue.push(cb);
+				return;
+			}
+			// 注意：页面上可能存在空的 window.twikoo 对象，不能用真值判断
+			window.__twikooQueue = [cb];
+			const s = document.createElement("script");
+			s.src = TWIKOO_SRC;
+			s.onload = () => {
+				const queue = window.__twikooQueue || [];
+				window.__twikooQueue = null;
+				queue.forEach((fn) => fn());
+			};
+			s.onerror = () => {
+				window.__twikooQueue = null;
+				console.error("[twikoo] 脚本加载失败:", TWIKOO_SRC);
+			};
+			document.head.appendChild(s);
+		}
 
 		function renderComments() {
 			const el = document.getElementById("twikoo");
-			if (!el) return;
-			// Swup 切页后同一路径不重复渲染
+			if (!el || !ready()) return;
 			const key = window.location.pathname;
+			// Swup 切页后同一路径不重复渲染
 			if (window.__twikooPath === key) return;
 			window.__twikooPath = key;
 
@@ -32,25 +55,11 @@ const { class: className = "" } = Astro.props;
 			});
 		}
 
-		function boot() {
-			if (window.twikoo) {
-				renderComments();
-				return;
-			}
-			if (scriptLoaded) return;
-			scriptLoaded = true;
-			const s = document.createElement("script");
-			s.src = TWIKOO_SRC;
-			s.onload = renderComments;
-			document.head.appendChild(s);
-		}
-
+		const boot = () => withTwikoo(renderComments);
 		boot();
 
 		// 站内跳转（Swup 局部替换）后重新挂载
-		const bindSwup = () => {
-			window.swup?.hooks?.on("page:view", boot);
-		};
+		const bindSwup = () => window.swup?.hooks?.on("page:view", boot);
 		if (window.swup) bindSwup();
 		else document.addEventListener("swup:enable", bindSwup);
 	})();
