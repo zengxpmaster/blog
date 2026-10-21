@@ -1,5 +1,10 @@
+// 不依赖 @cloudflare/workers-types 的全局类型，避免 astro check 报 Fetcher 未定义
+interface AssetFetcher {
+	fetch(request: Request): Promise<Response>;
+}
+
 interface Env {
-	ASSETS: Fetcher;
+	ASSETS: AssetFetcher;
 }
 
 const CANONICAL_HOST = "www.zengxpmaster.fun";
