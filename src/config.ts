@@ -48,8 +48,8 @@ export const navBarConfig: NavBarConfig = {
 		},
 		{
 			name: "图床",
-			url: "https://img.zengxpmaster.fun/",
-			external: true,
+			url: "/gallery/",
+			external: false,
 		},
 		{
 			name: "GitHub",

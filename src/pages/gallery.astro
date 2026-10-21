@@ -1,0 +1,49 @@
+---
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import gallery from "../data/gallery.json";
+
+const base = gallery.baseUrl.replace(/\/$/, "");
+const fmt = (bytes: number) => (bytes > 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
+---
+
+<MainGridLayout title="图床" description="个人图片与文件仓库，托管在 Cloudflare R2">
+	<div class="card-base px-6 md:px-9 py-6">
+		<div class="mb-5">
+			<h2 class="text-xl font-bold text-black/90 dark:text-white/90">图床</h2>
+			<p class="text-sm text-black/50 dark:text-white/50 mt-1">
+				托管在 Cloudflare R2，域名 {base.replace("https://", "")}。用 <code>scripts/upload-image.mjs</code> 上传。
+			</p>
+		</div>
+
+		<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+			{gallery.items.map((item) => (
+				<a
+					href={`${base}/${item.key}`}
+					target="_blank"
+					rel="noopener"
+					class="group rounded-xl overflow-hidden border border-[var(--line-divider)] hover:scale-[1.02] transition active:scale-95"
+				>
+					<div class="aspect-video overflow-hidden bg-[var(--btn-regular-bg)]">
+						<img
+							src={`${base}/${item.key}`}
+							alt={item.title}
+							loading="lazy"
+							class="w-full h-full object-cover group-hover:scale-105 transition"
+						/>
+					</div>
+					<div class="px-3 py-2 flex items-center justify-between text-xs text-black/60 dark:text-white/60">
+						<span class="truncate">{item.title}</span>
+						<span class="shrink-0 ml-2">{fmt(item.size)}</span>
+					</div>
+				</a>
+			))}
+		</div>
+
+		<div class="mt-6 text-sm text-black/60 dark:text-white/60">
+			<p>
+				文件下载：<a class="text-[var(--primary)] hover:underline" href={`${base}/images/202411181943276.apk`}>202411181943276.apk</a>
+				（8.1 MB）
+			</p>
+		</div>
+	</div>
+</MainGridLayout>
