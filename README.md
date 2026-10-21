@@ -55,8 +55,10 @@ lang: zh_CN
 `src/components/misc/Twikoo.astro`，使用旧的 Twikoo 服务端：
 
 ```js
-envId: "https://twikoo-cloudflare.zengxianpei2333.workers.dev/"
+envId: "https://twikoo.zengxpmaster.fun/"
 ```
+
+后端是 `twikoo-cloudflare` 这个 Worker，绑了自定义域 `twikoo.zengxpmaster.fun`（原来的 `*.workers.dev` 在国内无法访问）。前端脚本 `public/js/twikoo.all.min.js` 自托管，不依赖任何公共 CDN——之前用的 `cdn.staticfile.org` 实测会断连。
 
 评论按 `window.location.pathname` 归档。**注意**：旧站配置里 `path` 传的是字符串 `"location.pathname"`，如果旧评论确实是按这个字面量存的，迁过来后不会自动映射到新页面，需要在 Twikoo 后台核对。换评论系统只需替换该组件，并在 `src/pages/posts/[...slug].astro` 里换成新组件。
 
@@ -186,7 +188,5 @@ S3 端点在国内可能连不上，PicGo 里需要配代理。
 
 ## 已知问题
 
-- **评论后端不可达**：Twikoo 仍部署在 `twikoo-cloudflare.zengxianpei2333.workers.dev`，`*.workers.dev` 在国内无法直连，评论区会一直转圈。解决方式二选一：给该 Worker 绑一个自定义子域（如 `twikoo.zengxpmaster.fun`），或在该 Worker 前挂一层代理。
 - `img.zengxpmaster.fun` 根路径没有索引（R2 对象存储不认 `index.html`），浏览图床请走 `/gallery/`。
-
-PicGo 里建议配代理，否则可能连不上 R2 的 S3 端点。
+- 站内用到的第三方 CDN 在这个网络下基本不可用（jsdelivr、staticfile、workers.dev 均实测不通），所以评论脚本、字体、图标都走自托管或 Cloudflare 自有域名，新增依赖时注意这一点。
