@@ -1,8 +1,8 @@
 ---
-title: 如何破解校园网多设备限制
+title: 校园网共享上网检测原理与 OpenWrt 网关实践
 published: 2024-05-11
 updated: 2024-10-03
-description: 理解校园网检测多设备原理 使用 OpenWrt 破除校园网多设备限制
+description: 分析校园网识别多设备共享上网的几种检测手段，并用 OpenWrt 网关做统一出口的对照实验
 image: ''
 tags: ["OpenWrt"]
 category: 技术分享
@@ -10,16 +10,16 @@ draft: false
 lang: zh_CN
 ---
 
-理解校园网检测多设备原理ㅤ\
-使用 OpenWrt 破除校园网多设备限制
+理解校园网的多设备检测机制ㅤ\
+在 OpenWrt 网关上做统一出口的对照实验
 
 ## 前言
 
 > 文章引用 <u>SunBK201</u> 大佬 [校园网共享上网检测机制的研究与解决方案](https://www.sunbk201.site/posts/crack-campus-network/)\
 > <https://www.sunbk201.site/posts/crack-campus-network/>
 
-> [!CAUTION]
-> 本条推文非教程向，~~网络巨婴~~请自觉离开
+> [!NOTE]
+> 本文为原理分析与实验记录，配置仅用于学习与个人网络环境调试，请遵守所在学校的网络管理规定。
 
 校园网，禁止单一账号下多设备同时访问互联网。
 

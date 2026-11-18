@@ -39,7 +39,7 @@ lang: zh_CN
 写了两篇文章：
 
 1. [如何搭建个人博客](/posts/how-to-build-a-blog/)
-2. [如何破解校园网多设备限制](/posts/crack-campus-network/)~~《新建文件夹》~~
+2. [校园网共享上网检测原理与 OpenWrt 网关实践](/posts/crack-campus-network/)~~《新建文件夹》~~
 
 ### 9月至10月
 
