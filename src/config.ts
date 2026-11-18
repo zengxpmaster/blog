@@ -72,7 +72,7 @@ export const profileConfig: ProfileConfig = {
 		{
 			name: "Email",
 			icon: "fa6-solid:envelope",
-			url: "mailto:zengxianpei2333@outlook.com",
+			url: "mailto:shine.pei@qq.com",
 		},
 	],
 };
