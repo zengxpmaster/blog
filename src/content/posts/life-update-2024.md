@@ -17,7 +17,7 @@ lang: zh_CN
 
 ## 2023年
 
-网站初次建成，其中选择博客框架时在 [WordPress](https://wordpress.com/zh-cn/) 和 [Z-Blog](https://www.zblogcn.com/) 中反复横跳，最终决定使用 Z-Blog 因为 WordPress 对机器开销太大，2H2G时不时占用90%+。服务器后台管理选择[宝塔面板](https://www.bt.cn/new/index.html)~~破解版~~，域名在腾讯云注册的”.ltd”一元一年。
+网站初次建成，其中选择博客框架时在 [WordPress](https://wordpress.com/zh-cn/) 和 [Z-Blog](https://www.zblogcn.com/) 中反复横跳，最终决定使用 Z-Blog 因为 WordPress 对机器开销太大，2H2G时不时占用90%+。服务器后台管理选择[宝塔面板](https://www.bt.cn/new/index.html)，域名在腾讯云注册的”.ltd”一元一年。
 
 ### 11月至次年4月
 
