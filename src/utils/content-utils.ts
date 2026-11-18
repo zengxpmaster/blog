@@ -17,16 +17,22 @@ async function getRawSortedPosts() {
 	return sorted;
 }
 
+export function isVisiblePost(post: { data: { unlisted?: boolean } }): boolean {
+	return post.data.unlisted !== true;
+}
+
 export async function getSortedPosts() {
 	const sorted = await getRawSortedPosts();
+	const visible = sorted.filter(isVisiblePost);
 
-	for (let i = 1; i < sorted.length; i++) {
-		sorted[i].data.nextSlug = sorted[i - 1].slug;
-		sorted[i].data.nextTitle = sorted[i - 1].data.title;
+	// prev/next 只在可见文章之间串联，未列出文章不会出现在别人的翻页里
+	for (let i = 1; i < visible.length; i++) {
+		visible[i].data.nextSlug = visible[i - 1].slug;
+		visible[i].data.nextTitle = visible[i - 1].data.title;
 	}
-	for (let i = 0; i < sorted.length - 1; i++) {
-		sorted[i].data.prevSlug = sorted[i + 1].slug;
-		sorted[i].data.prevTitle = sorted[i + 1].data.title;
+	for (let i = 0; i < visible.length - 1; i++) {
+		visible[i].data.prevSlug = visible[i + 1].slug;
+		visible[i].data.prevTitle = visible[i + 1].data.title;
 	}
 
 	return sorted;
@@ -39,7 +45,7 @@ export async function getSortedPostsList(): Promise<PostForList[]> {
 	const sortedFullPosts = await getRawSortedPosts();
 
 	// delete post.body
-	const sortedPostsList = sortedFullPosts.map((post) => ({
+	const sortedPostsList = sortedFullPosts.filter(isVisiblePost).map((post) => ({
 		slug: post.slug,
 		data: post.data,
 	}));
@@ -53,7 +59,7 @@ export type Tag = {
 
 export async function getTagList(): Promise<Tag[]> {
 	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
+		return (import.meta.env.PROD ? data.draft !== true : true) && data.unlisted !== true;
 	});
 
 	const countMap: { [key: string]: number } = {};
@@ -80,7 +86,7 @@ export type Category = {
 
 export async function getCategoryList(): Promise<Category[]> {
 	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
+		return (import.meta.env.PROD ? data.draft !== true : true) && data.unlisted !== true;
 	});
 	const count: { [key: string]: number } = {};
 	allBlogPosts.forEach((post: { data: { category: string | null } }) => {
